@@ -1,0 +1,20 @@
+- name: disable default node js
+  ansible.builtin.command: dnf module disable nodejs -y
+
+- name: enable nodejs 20
+  ansible.builtin.command: dnf module enable nodejs:20 -y
+
+- name: nodejs setup
+  include_role:
+    name: common
+    tasks_from: nodejs
+
+- name: app setup
+  include_role:
+    name: common
+    tasks_from: appsetup
+
+- name: systemctl setup
+  include_role:
+    name: common
+    tasks_from: systemd

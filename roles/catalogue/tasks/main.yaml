@@ -1,0 +1,42 @@
+- name: disable nodejs
+  ansible.builtin.command: dnf module disable nodejs -y 
+- name: enable nodejs 20
+  ansible.builtin.command: dnf module enable nodejs:20 -y
+
+- name: nodejs setup
+  include_role:
+    name: common
+    tasks_from: nodejs  
+
+- name: app set up
+  include_role:
+    name: common
+    tasks_from: appsetup 
+
+- name: systemctl setup
+  include_role:
+    name: common
+    tasks_from: systemd    
+
+- name: copy mongo repo
+  ansible.builtin.copy:
+    src: mongo.repo
+    dest: /etc/yum.repos.d/mongo.repo    
+
+- name: install mongodb client
+  ansible.builtin.package:
+    name: mongodb-mongosh
+    state: present
+
+- name: check products loaded or not
+  # ansible.builtin.command: mongosh --host  --eval "204.236.198.113" 'db.getMongo().getDBNames().indexOf("catalogue")'
+  ansible.builtin.command: mongosh --host {{ MONGODB_HOST }} --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
+  register: catalogue_output
+
+- name: print catalogue output
+  ansible.builtin.debug:
+    msg: "{{ catalogue_output }}"
+
+- name: load products
+  ansible.builtin.shell: mongosh --host {{ MONGODB_HOST }} < /app/db/master-data.js
+  when: catalogue_output.stdout | int < 0
