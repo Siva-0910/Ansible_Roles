@@ -3,15 +3,15 @@
 - name: enable nodejs 20
   ansible.builtin.command: dnf module enable nodejs:20 -y
 
-- name: nodejs setup
-  include_role:
-    name: common
-    tasks_from: nodejs  
-
 - name: app set up
   include_role:
     name: common
     tasks_from: appsetup 
+
+- name: nodejs setup
+  include_role:
+    name: common
+    tasks_from: nodejs 
 
 - name: systemctl setup
   include_role:
